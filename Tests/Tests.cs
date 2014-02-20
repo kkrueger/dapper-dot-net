@@ -189,7 +189,8 @@ namespace SqlMapper
         {
             const char c1 = 'ą';
             const char c3 = 'ó';
-            NoDefaultConstructorWithChar nodef = connection.Query<NoDefaultConstructorWithChar>("select @c1 c1, @c2 c2, @c3 c3", new { c1 = c1, c2 = (char?)null, c3 = c3 }).First();
+            NoDefaultConstructorWithChar nodef = connection.Query<NoDefaultConstructorWithChar>("select @c1 c1, @c2 c2, @c3 c3", 
+              new { c1 = new DbString { Value = c1.ToString(), IsAnsi = false, IsFixedLength = true, Length = 1 }, c2 = (char?)null, c3 = c3 }).First();
             nodef.Char1.IsEqualTo(c1);
             nodef.Char2.IsEqualTo(null);
             nodef.Char3.IsEqualTo(c3);
@@ -1593,22 +1594,22 @@ end");
         public void TestCharInputAndOutput()
         {
             const char test = '〠';
-            char c = connection.Query<char>("select @c", new { c = test }).Single();
+            char c = connection.Query<char>("select @c", new { c = new DbString { Value = test.ToString(), IsAnsi = false, IsFixedLength = true, Length = 1}}).Single();
 
             c.IsEqualTo(test);
 
-            var obj = connection.Query<WithCharValue>("select @Value as Value", new WithCharValue { Value = c }).Single();
+            var obj = connection.Query<WithCharValue>("select @Value as Value", new  { Value = new DbString() { Value = c.ToString(), IsAnsi = false }}).Single();
 
             obj.Value.IsEqualTo(test);
         }
         public void TestNullableCharInputAndOutputNonNull()
         {
             char? test = '〠';
-            char? c = connection.Query<char?>("select @c", new { c = test }).Single();
+            char? c = connection.Query<char?>("select @c", new { c = new DbString { Value = test.ToString(), IsAnsi = false, IsFixedLength = true, Length = 1}}).Single();
 
             c.IsEqualTo(test);
 
-            var obj = connection.Query<WithCharValue>("select @ValueNullable as ValueNullable", new WithCharValue { ValueNullable = c }).Single();
+            var obj = connection.Query<WithCharValue>("select @ValueNullable as ValueNullable", new { ValueNullable = new DbString { Value = c.ToString(), IsAnsi = false, IsFixedLength = true, Length = 1}}).Single();
 
             obj.ValueNullable.IsEqualTo(test);
         }
